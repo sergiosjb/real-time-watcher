@@ -10,62 +10,105 @@ const Index = () => {
     totalDistance: 0,
     todayDistance: 0,
     remainingToGoal: 0,
+    goalDistance: 0,
     estimatedDate: "",
-    earthSunDistance: 151783917,
+    earthSunDistance: 0,
     moonOrbits: 0,
-    moonPhase: "Quarto Crescente"
+    moonPhase: "🌑 Nova"
   });
 
-  // Velocidade orbital da Terra: ~30 km/s
-  const EARTH_ORBITAL_SPEED = 30; // km/s
-  const SECONDS_PER_DAY = 86400;
-  const GOAL_DISTANCE = 55000000000; // 55 bilhões de km
+  // Constantes baseadas no código de referência
+  const ORBITAL_SPEED_KM_PER_SECOND = 107226 / 3600; // 107226 km/h convertido para km/s
+  const AVERAGE_DISTANCE_KM = 149597870.7; // Distância média Terra-Sol
+  const MOON_ORBITAL_PERIOD_DAYS = 27.321661; // Período orbital da Lua
+
+  const formatKm = (km: number): string => {
+    return km.toLocaleString("pt-BR", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+  };
+
+  const formatBrazilianDate = (date: Date): string => {
+    return date.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    });
+  };
+
+  const estimateCurrentDistanceToSun = (): number => {
+    const now = new Date();
+    const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000);
+    const eccentricity = 0.0167;
+    const angleRad = 2 * Math.PI * (dayOfYear / 365.25);
+    return AVERAGE_DISTANCE_KM * (1 - eccentricity * Math.cos(angleRad));
+  };
+
+  const calculateMoonOrbits = (birthDate: Date): number => {
+    const now = new Date();
+    const daysSinceBirth = (now.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24);
+    return daysSinceBirth / MOON_ORBITAL_PERIOD_DAYS;
+  };
+
+  const calculateMoonPhase = (): string => {
+    const now = new Date();
+    const daysSinceNewMoon = (now.getTime() - new Date("2000-01-06T18:14:00Z").getTime()) / (1000 * 60 * 60 * 24);
+    const moonAge = daysSinceNewMoon % 29.530588853;
+    
+    if (moonAge < 1.84566) return "🌑 Nova";
+    else if (moonAge < 5.53699) return "🌒 Crescente";
+    else if (moonAge < 9.22831) return "🌓 Quarto Crescente";
+    else if (moonAge < 12.91963) return "🌔 Gibosa Crescente";
+    else if (moonAge < 16.61096) return "🌕 Cheia";
+    else if (moonAge < 20.30228) return "🌖 Gibosa Minguante";
+    else if (moonAge < 23.99361) return "🌗 Quarto Minguante";
+    else if (moonAge < 27.68493) return "🌘 Minguante";
+    else return "🌑 Nova";
+  };
 
   useEffect(() => {
     const calculateData = () => {
-      const birth = new Date(birthDate);
+      const birth = new Date(birthDate + "T08:00:00Z"); // Horário UTC como no código original
       const now = new Date();
-      const daysSinceBirth = Math.floor((now.getTime() - birth.getTime()) / (1000 * 60 * 60 * 24));
       
       // Distância total percorrida
-      const totalDistance = daysSinceBirth * EARTH_ORBITAL_SPEED * SECONDS_PER_DAY;
+      const secondsSinceBirth = (now.getTime() - birth.getTime()) / 1000;
+      const totalDistance = secondsSinceBirth * ORBITAL_SPEED_KM_PER_SECOND;
       
       // Distância percorrida hoje
-      const startOfDay = new Date(now);
-      startOfDay.setHours(0, 0, 0, 0);
-      const secondsToday = Math.floor((now.getTime() - startOfDay.getTime()) / 1000);
-      const todayDistance = secondsToday * EARTH_ORBITAL_SPEED;
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const secondsToday = (now.getTime() - startOfDay.getTime()) / 1000;
+      const todayDistance = secondsToday * ORBITAL_SPEED_KM_PER_SECOND;
       
-      // Distância restante para o objetivo
-      const remainingToGoal = Math.max(0, GOAL_DISTANCE - totalDistance);
+      // Cálculo do próximo bilhão (baseado no código original)
+      const billion = 1_000_000_000;
+      const nextMilestone = Math.ceil(totalDistance / billion) * billion;
+      const remainingToGoal = nextMilestone - totalDistance;
       
-      // Data estimada para atingir o objetivo
-      const daysToGoal = remainingToGoal / (EARTH_ORBITAL_SPEED * SECONDS_PER_DAY);
-      const estimatedDate = new Date(now.getTime() + daysToGoal * 24 * 60 * 60 * 1000);
+      // Data estimada para atingir o próximo bilhão
+      const secondsRemaining = remainingToGoal / ORBITAL_SPEED_KM_PER_SECOND;
+      const estimatedDate = new Date(now.getTime() + secondsRemaining * 1000);
       
-      // Órbitas da Lua (período orbital: ~27.3 dias)
-      const moonOrbits = Math.floor(daysSinceBirth / 27.3);
+      // Distância atual da Terra ao Sol
+      const earthSunDistance = estimateCurrentDistanceToSun();
+      
+      // Órbitas da Lua desde o nascimento
+      const moonOrbits = calculateMoonOrbits(birth);
+      
+      // Fase atual da Lua
+      const moonPhase = calculateMoonPhase();
       
       setCurrentData({
         totalDistance,
         todayDistance,
         remainingToGoal,
-        estimatedDate: estimatedDate.toLocaleDateString('pt-BR'),
-        earthSunDistance: 151783917,
-        moonOrbits,
-        moonPhase: getCurrentMoonPhase()
+        goalDistance: nextMilestone,
+        estimatedDate: formatBrazilianDate(estimatedDate),
+        earthSunDistance,
+        moonOrbits: Math.floor(moonOrbits),
+        moonPhase
       });
-    };
-
-    const getCurrentMoonPhase = () => {
-      const phases = ["Nova", "Crescente", "Quarto Crescente", "Gibosa Crescente", 
-                     "Cheia", "Gibosa Minguante", "Quarto Minguante", "Minguante"];
-      const now = new Date();
-      const knownNewMoon = new Date('2024-01-11'); // Data de lua nova conhecida
-      const lunarCycle = 29.53; // dias
-      const daysSinceKnown = (now.getTime() - knownNewMoon.getTime()) / (1000 * 60 * 60 * 24);
-      const phaseIndex = Math.floor((daysSinceKnown % lunarCycle) / lunarCycle * 8);
-      return phases[phaseIndex];
     };
 
     calculateData();
@@ -112,19 +155,19 @@ const Index = () => {
         {/* Cards com informações */}
         <Card className="bg-black/20 backdrop-blur-sm border-white/20 p-6">
           <div className="text-center text-white text-xl font-semibold">
-            {currentData.totalDistance.toLocaleString('pt-BR')} km
+            {formatKm(currentData.totalDistance)} km
           </div>
         </Card>
 
         <Card className="bg-black/20 backdrop-blur-sm border-white/20 p-6">
           <div className="text-center text-white text-xl">
-            Hoje já percorreu {currentData.todayDistance.toLocaleString('pt-BR')} km
+            Hoje já percorreu {formatKm(currentData.todayDistance)} km
           </div>
         </Card>
 
         <Card className="bg-black/20 backdrop-blur-sm border-white/20 p-6">
           <div className="text-center text-white text-xl">
-            Faltam {currentData.remainingToGoal.toLocaleString('pt-BR')} km para atingir {GOAL_DISTANCE.toLocaleString('pt-BR')} km
+            Faltam {formatKm(currentData.remainingToGoal)} km para atingir {formatKm(currentData.goalDistance)} km
           </div>
         </Card>
 
@@ -136,19 +179,19 @@ const Index = () => {
 
         <Card className="bg-black/20 backdrop-blur-sm border-white/20 p-6">
           <div className="text-center text-white text-xl">
-            📏 Distância aproximada da Terra ao Sol: {currentData.earthSunDistance.toLocaleString('pt-BR')} km
+            📏 Distância aproximada da Terra ao Sol: {formatKm(currentData.earthSunDistance)} km
           </div>
         </Card>
 
         <Card className="bg-black/20 backdrop-blur-sm border-white/20 p-6">
           <div className="text-center text-white text-xl">
-            🌙 A Lua deu aproximadamente {currentData.moonOrbits} voltas em torno da Terra desde seu nascimento.
+            🌕 A Lua deu aproximadamente {currentData.moonOrbits} voltas em torno da Terra desde seu nascimento.
           </div>
         </Card>
 
         <Card className="bg-black/20 backdrop-blur-sm border-white/20 p-6">
           <div className="text-center text-white text-xl">
-            🌙 Fase atual da Lua: 🌓 {currentData.moonPhase}
+            🌙 Fase atual da Lua: {currentData.moonPhase}
           </div>
         </Card>
       </div>

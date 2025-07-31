@@ -84,7 +84,7 @@ const Index = () => {
       // Cálculo do próximo bilhão (baseado no código original)
       const billion = 1_000_000_000;
       const nextMilestone = Math.ceil(totalDistance / billion) * billion;
-      const remainingToGoal = nextMilestone - totalDistance;
+      const remainingToGoal = Math.max(0, nextMilestone - totalDistance);
       
       // Data estimada para atingir o próximo bilhão
       const secondsRemaining = remainingToGoal / ORBITAL_SPEED_KM_PER_SECOND;

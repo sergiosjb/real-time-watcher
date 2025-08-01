@@ -41,6 +41,16 @@ const Index = () => {
     });
   };
 
+  const convertToDisplayFormat = (isoDate: string): string => {
+    const [year, month, day] = isoDate.split('-');
+    return `${day}/${month}/${year}`;
+  };
+
+  const convertToISOFormat = (displayDate: string): string => {
+    const [day, month, year] = displayDate.split('/');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  };
+
   const estimateCurrentDistanceToSun = (): number => {
     const now = new Date();
     const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000);
@@ -177,10 +187,23 @@ const Index = () => {
                 key={`birth-date-input-${isManualDateInput ? 'manual' : 'calendar'}`}
                 id="birthDate"
                 type={isManualDateInput ? "text" : "date"}
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
+                value={isManualDateInput ? convertToDisplayFormat(birthDate) : birthDate}
+                onChange={(e) => {
+                  if (isManualDateInput) {
+                    // Se está digitando no formato DD/MM/AAAA, converte para ISO antes de salvar
+                    const value = e.target.value;
+                    if (value.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                      setBirthDate(convertToISOFormat(value));
+                    } else {
+                      // Permite digitação livre durante a edição
+                      setBirthDate(value);
+                    }
+                  } else {
+                    setBirthDate(e.target.value);
+                  }
+                }}
                 className="bg-white/20 border-white/30 text-white placeholder:text-white/70 [color-scheme:dark]"
-                placeholder={isManualDateInput ? "AAAA-MM-DD" : ""}
+                placeholder={isManualDateInput ? "DD/MM/AAAA" : ""}
                 max={isManualDateInput ? undefined : format(new Date(), "yyyy-MM-dd")}
                 min={isManualDateInput ? undefined : "1900-01-01"}
               />

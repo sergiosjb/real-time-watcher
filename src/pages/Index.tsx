@@ -164,35 +164,16 @@ const Index = () => {
               />
             </div>
             <div>
-              <Label className="text-white">Data de Nascimento</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal bg-white/20 border-white/30 text-white hover:bg-white/30",
-                      !birthDate && "text-white/70"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {birthDate ? format(new Date(birthDate), "dd/MM/yyyy") : "Selecione uma data"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={birthDate ? new Date(birthDate) : undefined}
-                    onSelect={(date) => {
-                      if (date) {
-                        setBirthDate(format(date, "yyyy-MM-dd"));
-                      }
-                    }}
-                    disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
+              <Label htmlFor="birthDate" className="text-white">Data de Nascimento</Label>
+              <Input
+                id="birthDate"
+                type="date"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                className="bg-white/20 border-white/30 text-white placeholder:text-white/70"
+                max={format(new Date(), "yyyy-MM-dd")}
+                min="1900-01-01"
+              />
             </div>
           </div>
         </div>

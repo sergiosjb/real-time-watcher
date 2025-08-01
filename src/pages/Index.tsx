@@ -189,17 +189,25 @@ const Index = () => {
                 type={isManualDateInput ? "text" : "date"}
                 value={isManualDateInput ? convertToDisplayFormat(birthDate) : birthDate}
                 onChange={(e) => {
+                  const value = e.target.value;
                   if (isManualDateInput) {
-                    // Se está digitando no formato DD/MM/AAAA, converte para ISO antes de salvar
-                    const value = e.target.value;
+                    // Se tem o formato DD/MM/AAAA completo, converte para ISO
                     if (value.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
                       setBirthDate(convertToISOFormat(value));
                     } else {
-                      // Permite digitação livre durante a edição
-                      setBirthDate(value);
+                      // Durante a digitação, mantém o valor temporário mas não atualiza o estado principal
+                      // Isso evita erros de conversão durante a digitação
                     }
                   } else {
-                    setBirthDate(e.target.value);
+                    setBirthDate(value);
+                  }
+                }}
+                onBlur={(e) => {
+                  if (isManualDateInput) {
+                    const value = e.target.value;
+                    if (value.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                      setBirthDate(convertToISOFormat(value));
+                    }
                   }
                 }}
                 className="bg-white/20 border-white/30 text-white placeholder:text-white/70 [color-scheme:dark]"

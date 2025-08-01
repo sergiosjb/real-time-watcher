@@ -161,11 +161,12 @@ const Index = () => {
             <div>
               <Label htmlFor="birthDate" className="text-white">Data de Nascimento</Label>
               <Input
+                key="birth-date-input-v2"
                 id="birthDate"
                 type="date"
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value)}
-                className="bg-white/20 border-white/30 text-white placeholder:text-white/70"
+                className="bg-white/20 border-white/30 text-white placeholder:text-white/70 [color-scheme:dark]"
                 max={format(new Date(), "yyyy-MM-dd")}
                 min="1900-01-01"
               />

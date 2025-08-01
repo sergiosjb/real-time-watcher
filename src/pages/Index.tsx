@@ -3,10 +3,12 @@ import { format } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [name, setName] = useState("Sérgio");
   const [birthDate, setBirthDate] = useState("1967-06-18");
+  const [isManualDateInput, setIsManualDateInput] = useState(false);
   const [currentData, setCurrentData] = useState({
     totalDistance: 0,
     todayDistance: 0,
@@ -159,16 +161,28 @@ const Index = () => {
               />
             </div>
             <div>
-              <Label htmlFor="birthDate" className="text-white">Data de Nascimento</Label>
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor="birthDate" className="text-white">Data de Nascimento</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsManualDateInput(!isManualDateInput)}
+                  className="text-white/70 hover:text-white hover:bg-white/10 text-xs"
+                >
+                  {isManualDateInput ? "📅 Calendário" : "✏️ Editar"}
+                </Button>
+              </div>
               <Input
-                key="birth-date-input-v2"
+                key={`birth-date-input-${isManualDateInput ? 'manual' : 'calendar'}`}
                 id="birthDate"
-                type="date"
+                type={isManualDateInput ? "text" : "date"}
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value)}
                 className="bg-white/20 border-white/30 text-white placeholder:text-white/70 [color-scheme:dark]"
-                max={format(new Date(), "yyyy-MM-dd")}
-                min="1900-01-01"
+                placeholder={isManualDateInput ? "AAAA-MM-DD" : ""}
+                max={isManualDateInput ? undefined : format(new Date(), "yyyy-MM-dd")}
+                min={isManualDateInput ? undefined : "1900-01-01"}
               />
             </div>
           </div>

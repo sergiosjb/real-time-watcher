@@ -20,7 +20,8 @@ const Index = () => {
     estimatedDate: "",
     earthSunDistance: 0,
     moonOrbits: 0,
-    moonPhase: "🌑 Nova"
+    moonPhase: "🌑 Nova",
+    zodiacSign: ""
   });
 
   // Constantes baseadas no código de referência
@@ -73,6 +74,26 @@ const Index = () => {
     else return "🌑 Nova";
   };
 
+  const calculateZodiacSign = (birthDate: Date): string => {
+    const day = birthDate.getDate();
+    const month = birthDate.getMonth() + 1; // getMonth() retorna 0-11
+    
+    if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return "♈ Áries";
+    if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return "♉ Touro";
+    if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return "♊ Gêmeos";
+    if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return "♋ Câncer";
+    if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return "♌ Leão";
+    if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return "♍ Virgem";
+    if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return "♎ Libra";
+    if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) return "♏ Escorpião";
+    if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return "♐ Sagitário";
+    if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return "♑ Capricórnio";
+    if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return "♒ Aquário";
+    if ((month === 2 && day >= 19) || (month === 3 && day <= 20)) return "♓ Peixes";
+    
+    return "♈ Áries"; // fallback
+  };
+
   useEffect(() => {
     const calculateData = () => {
       const birth = new Date(birthDate + "T08:00:00Z"); // Horário UTC como no código original
@@ -105,6 +126,9 @@ const Index = () => {
       // Fase atual da Lua
       const moonPhase = calculateMoonPhase();
       
+      // Signo zodiacal
+      const zodiacSign = calculateZodiacSign(birth);
+      
       setCurrentData({
         totalDistance,
         todayDistance,
@@ -113,7 +137,8 @@ const Index = () => {
         estimatedDate: formatBrazilianDate(estimatedDate),
         earthSunDistance,
         moonOrbits: Math.floor(moonOrbits),
-        moonPhase
+        moonPhase,
+        zodiacSign
       });
     };
 
@@ -219,6 +244,12 @@ const Index = () => {
         <Card className="bg-black/20 backdrop-blur-sm border-white/20 p-6">
           <div className="text-center text-white text-xl">
             🌙 Fase atual da Lua: {currentData.moonPhase}
+          </div>
+        </Card>
+
+        <Card className="bg-black/20 backdrop-blur-sm border-white/20 p-6">
+          <div className="text-center text-white text-xl">
+            ⭐ Signo: {currentData.zodiacSign}
           </div>
         </Card>
       </div>

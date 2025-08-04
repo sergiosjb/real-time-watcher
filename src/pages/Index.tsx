@@ -4,8 +4,11 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const { toast } = useToast();
   const [name, setName] = useState("Sérgio");
   const [birthDate, setBirthDate] = useState("1967-06-18");
   const [isManualDateInput, setIsManualDateInput] = useState(false);
@@ -100,6 +103,43 @@ const Index = () => {
     if ((month === 2 && day >= 19) || (month === 3 && day <= 20)) return "♓ Peixes";
     
     return "♈ Áries"; // fallback
+  };
+
+  const getCountryFromTimezone = (): string => {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (timezone.includes('Brazil') || timezone.includes('Sao_Paulo') || timezone.includes('Recife') || timezone.includes('Manaus')) {
+      return 'Brasil';
+    }
+    return timezone.split('/')[0] || 'Desconhecido';
+  };
+
+  const saveUsageLog = async () => {
+    try {
+      const country = getCountryFromTimezone();
+      const { error } = await supabase
+        .from('usage_logs')
+        .insert({
+          name,
+          birth_date: birthDate,
+          country
+        });
+
+      if (error) {
+        console.error('Erro ao salvar log:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao salvar dados de uso",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Dados salvos",
+          description: "Log de uso registrado com sucesso",
+        });
+      }
+    } catch (error) {
+      console.error('Erro:', error);
+    }
   };
 
   useEffect(() => {
@@ -220,6 +260,15 @@ const Index = () => {
                 min={isManualDateInput ? undefined : "1900-01-01"}
               />
             </div>
+          </div>
+          <div className="mt-4 text-center">
+            <Button 
+              onClick={saveUsageLog}
+              className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+              variant="outline"
+            >
+              💾 Salvar Log de Uso
+            </Button>
           </div>
         </div>
 

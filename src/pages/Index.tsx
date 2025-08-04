@@ -126,16 +126,21 @@ const Index = () => {
 
       if (error) {
         console.error('Erro ao salvar log:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao salvar dados de uso",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Dados salvos",
+          description: "Log de uso registrado com sucesso",
+        });
       }
     } catch (error) {
       console.error('Erro:', error);
     }
   };
-
-  // Salvar log automaticamente na primeira visita
-  useEffect(() => {
-    saveUsageLog();
-  }, []);
 
   useEffect(() => {
     const calculateData = () => {
@@ -256,8 +261,16 @@ const Index = () => {
               />
             </div>
           </div>
+          <div className="mt-4 text-center">
+            <Button 
+              onClick={saveUsageLog}
+              className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+              variant="outline"
+            >
+              💾 Salvar Log de Uso
+            </Button>
+          </div>
         </div>
-
         {/* Título principal */}
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-white">

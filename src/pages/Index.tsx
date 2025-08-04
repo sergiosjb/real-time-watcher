@@ -9,6 +9,7 @@ const Index = () => {
   const [name, setName] = useState("Sérgio");
   const [birthDate, setBirthDate] = useState("1967-06-18");
   const [isManualDateInput, setIsManualDateInput] = useState(false);
+  const [tempDateValue, setTempDateValue] = useState("");
   const [currentData, setCurrentData] = useState({
     totalDistance: 0,
     todayDistance: 0,
@@ -177,7 +178,12 @@ const Index = () => {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => setIsManualDateInput(!isManualDateInput)}
+                  onClick={() => {
+                    setIsManualDateInput(!isManualDateInput);
+                    if (!isManualDateInput) {
+                      setTempDateValue(convertToDisplayFormat(birthDate));
+                    }
+                  }}
                   className="text-white/70 hover:text-white hover:bg-white/10 text-xs"
                 >
                   {isManualDateInput ? "📅 Calendário" : "✏️ Editar"}
@@ -187,16 +193,14 @@ const Index = () => {
                 key={`birth-date-input-${isManualDateInput ? 'manual' : 'calendar'}`}
                 id="birthDate"
                 type={isManualDateInput ? "text" : "date"}
-                value={isManualDateInput ? convertToDisplayFormat(birthDate) : birthDate}
+                value={isManualDateInput ? tempDateValue : birthDate}
                 onChange={(e) => {
                   const value = e.target.value;
                   if (isManualDateInput) {
+                    setTempDateValue(value);
                     // Se tem o formato DD/MM/AAAA completo, converte para ISO
                     if (value.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
                       setBirthDate(convertToISOFormat(value));
-                    } else {
-                      // Durante a digitação, mantém o valor temporário mas não atualiza o estado principal
-                      // Isso evita erros de conversão durante a digitação
                     }
                   } else {
                     setBirthDate(value);
